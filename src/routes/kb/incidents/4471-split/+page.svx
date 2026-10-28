@@ -1,0 +1,62 @@
+---
+layout: runbook
+title: '#4471 split · three problems, not one'
+owner: Paweł Gałuszka
+status: proposed
+reviewed: 2026-10-28
+signature: 'v1.eyJzdWIiOiIyMjM3IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMxOTIzMDIsImV4cCI6MTc5MzI3ODcwMn0.tcvOLUGzptDIMbtAjj-SPl-zTrpOq1qiPFzEzIEaUWk'
+---
+
+<script>
+  import ProblemSplit from '#lib/kb/ProblemSplit.svelte';
+  import CauseTable from '#lib/kb/CauseTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const repo = 'https://github.com/pgaluszk/mega-dev-public/issues';
+  const issues = { parser: repo + '/1', hint: repo + '/2', 'one-day': repo + '/3' };
+</script>
+
+[#4471](/kb/incidents/4471) is marked *known: one issue, one fix queued*. It holds three problems.
+The desk merged every report whose subject matched ([decision 0001](/kb/decisions/0001-dedupe-by-subject)),
+and twelve different subjects about wrong dates all landed in one ticket. A subject says what the
+reporter saw, not what broke.
+
+<Callout kind="warn">
+The queued parser fix closes only the first row. The other two stay open after it ships, so they
+each have their own ticket now.
+</Callout>
+
+## The problems in #4471
+
+<ProblemSplit ticket={4471} {issues} />
+
+- **Parser.** The shared parser reads dates month first; every tenant on file writes the day first.
+  Any channel, every tenant.
+- **Form hint.** booking-v3 prints `MM/DD/YYYY` under its date field, people type month first, and the
+  form reads the tenant's way. Only through the form, only on booking-v3 tenants. The parser fix
+  does not touch it.
+- **One-day move.** Not a swap: the date moves by one day, and depends on where the reader is
+  ("Client in Lisbon got Tuesday. Client in Toronto got Monday."). The desk already noted these
+  reports (`desk-notes.json`); `causes.ts` still files them under the parser by tenant.
+
+## How the counts are made
+
+- The export pages overlap, so the same report can appear twice. One id is one report.
+- The cause comes from the tenant (locale, booking form) and the channel, as in `causes.ts`. The
+  intake tag is a guess from the reporter's browser and is not used.
+- The desk's one-day-move reads come out of the group they were filed in.
+
+The numbers above are computed from the ticket export each time the page renders. For comparison,
+the table on the #4471 page, built by the same code without the one-day split:
+
+<CauseTable ticket={4471} />
+
+## For the desk
+
+- Before you merge a report by subject, check its tenant and channel: `causeOf()` tells two problems
+  apart that share a subject.
+- Decision 0001 merges on subject alone. A new decision record should replace it; this page does not
+  edit it.
+
+<RenderStamp {signature} />
