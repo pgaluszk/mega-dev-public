@@ -44,4 +44,4 @@ The kb export above, made buildable (`npm install && npm run build`, SvelteKit +
 - `src/routes/kb/incidents/4471-split/+page.svx`: #4471 split into the problems it holds, signed.
 - `src/lib/kb/ProblemSplit.svelte`: the table on that page, computed from the export at render time.
 - `rendered/kb/incidents/4471-split.html` and `.png`: the page as the desk sees it (static build).
-- Issues #1–#3: one ticket per problem, each with how many reports it covers.
+- Issues #1–#3: one ticket per problem, each with how many reports it covers (closed after the engineering update of 5 Oct).

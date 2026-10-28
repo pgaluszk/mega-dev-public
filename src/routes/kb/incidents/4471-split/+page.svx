@@ -2,7 +2,7 @@
 layout: runbook
 title: '#4471 split · three problems, not one'
 owner: Paweł Gałuszka
-status: proposed
+status: closed
 reviewed: 2026-10-28
 signature: 'v1.eyJzdWIiOiIyMjM3IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMxOTIzMDIsImV4cCI6MTc5MzI3ODcwMn0.tcvOLUGzptDIMbtAjj-SPl-zTrpOq1qiPFzEzIEaUWk'
 ---
@@ -14,17 +14,29 @@ signature: 'v1.eyJzdWIiOiIyMjM3IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpY
   import RenderStamp from '#lib/kb/RenderStamp.svelte';
 
   const repo = 'https://github.com/pgaluszk/mega-dev-public/issues';
-  const issues = { parser: repo + '/1', hint: repo + '/2', 'one-day': repo + '/3' };
+  const issues = {
+    parser: { url: repo + '/1', state: 'closed, fixed' },
+    hint: { url: repo + '/2', state: "closed, won't fix" },
+    'one-day': { url: repo + '/3', state: 'closed, not fixed by #4471' },
+  };
 </script>
 
-[#4471](/kb/incidents/4471) is marked *known: one issue, one fix queued*. It holds three problems.
+[#4471](/kb/incidents/4471) was marked *known: one issue, one fix queued*. It held three problems.
 The desk merged every report whose subject matched ([decision 0001](/kb/decisions/0001-dedupe-by-subject)),
 and twelve different subjects about wrong dates all landed in one ticket. A subject says what the
 reporter saw, not what broke.
 
+## Outcome
+
+Engineering closed #4471 on 5 October:
+
+- **parser: fixed** by `fix(dates): parse dd/mm for eu locales`. Ticket #1 closed as done.
+- **hint: won't fix.** The booking-v3 form is retired. Ticket #2 closed as not planned.
+- **one-day move:** neither change touches it. Ticket #3 closed with #4471; if these reports come
+  back after the parser fix, reopen #3 rather than merging them into a new date ticket.
+
 <Callout kind="warn">
-The queued parser fix closes only the first row. The other two stay open after it ships, so they
-each have their own ticket now.
+The parser fix did not close the whole of #4471. Two of its problems were never the parser.
 </Callout>
 
 ## The problems in #4471
@@ -45,10 +57,11 @@ each have their own ticket now.
 - The export pages overlap, so the same report can appear twice. One id is one report.
 - The cause comes from the tenant (locale, booking form) and the channel, as in `causes.ts`. The
   intake tag is a guess from the reporter's browser and is not used.
-- The desk's one-day-move reads come out of the group they were filed in.
+- Each report is counted once, where the desk files it. The desk's one-day-move reads stay in the
+  parser count and also get their own row.
 
-The numbers above are computed from the ticket export each time the page renders. For comparison,
-the table on the #4471 page, built by the same code without the one-day split:
+The numbers above are computed from the ticket export each time the page renders. The table on the
+#4471 page, built by the same code, gives the same counts:
 
 <CauseTable ticket={4471} />
 
